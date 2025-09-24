@@ -225,5 +225,9 @@ def gera_resposta(status, conteudo, mensagem=False):
     
 # DUMPS - CONVERTE O DICIONÁRIO CRIADO (BODY) EM JSON
 if __name__ == '__main__':
+    with app.app_context():
+        mybd.create_all()  # Cria as tabelas no banco de dados
+   
     start_mqtt()
     app.run(port=5000, host='localhost', debug=True)
+    
