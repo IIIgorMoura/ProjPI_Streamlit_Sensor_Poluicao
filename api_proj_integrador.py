@@ -10,7 +10,7 @@ app = Flask('Sensores')
 # RASTREIA AS MODIFICAÇÕES REALIZADAS
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # CONFIGURAÇÃO DE CONEXÃO COM O BANCO (ajuste o nome do banco se necessário)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Senai%40134@127.0.0.1/db_qualidade_ar'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://grupo1DataScience:Senai%40134@db-sensor-datascience-senai-gp1.mysql.database.azure.com/db_qualidade_ar'
 
 mybd = SQLAlchemy(app)
 # ********************* CONEXÃO SENSORES *********************************

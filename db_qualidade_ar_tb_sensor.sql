@@ -4,7 +4,7 @@
 -- ------------------------------------------------------
 -- Server version	8.0.38
 
-CREATE DATABASE db_qualidade_ar;
+-- CREATE DATABASE db_qualidade_ar;
 USE db_qualidade_ar;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
