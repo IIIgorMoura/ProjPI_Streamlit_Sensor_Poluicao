@@ -20,6 +20,8 @@ database = 'db_qualidade_ar'
 
 certificado = 'DigiCertGlobalRootG2.crt.pem'
 
+
+# >>>>>>>>>>>>>>>>> Projeto do GRUPO 1: grupo1DataScience <<<<<<<<<<<<<<<<<<<<< 
 uri = f"mysql+pymysql://{username}:{password}@{server_name}:{port}/{database}"
 ssl_certificado = f'?ssl_ca={certificado}'
 
