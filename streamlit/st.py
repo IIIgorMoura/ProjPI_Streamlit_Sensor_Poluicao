@@ -190,7 +190,49 @@ def dashboard():
 
             st.plotly_chart(fig_linhas, use_container_width=True)
     
-    grafico_linha()
+    def grafico_barra():
+
+        tabelas = {
+            "df1": df1_selecionado,
+            "df2": df2_selecionado,
+            "df3": df3_selecionado
+        }
+
+        tabela_selecionada = st.selectbox(
+                'Escolha a tabela',
+                options=list(tabelas.keys()),
+                key='filtro_tabela'
+            )
+
+            # Pega o DataFrame correspondente
+        df_x = tabelas[tabela_selecionada]
+
+        colunas_disponiveis = {
+            'Temperatura': 'temperatura',
+            'Umidade': 'umidade',
+            'CO2': 'co2',
+            'Pressão': 'pressao'
+        }
+
+        coluna_chave = st.selectbox(
+            'Filtro:',
+            options=list(colunas_disponiveis.keys())
+        )
+
+        coluna_selecionada = colunas_disponiveis[coluna_chave]
+
+        if not df_x[coluna_selecionada].dropna().empty: 
+        
+            valores_barra = df_x.groupby(['local', 'data'], as_index=False).agg(
+                max=(coluna_selecionada, 'max'),
+                min=(coluna_selecionada, 'min'),
+                media=(coluna_selecionada, 'mean')
+            )
+
+            st.write(valores_barra)
+
+
+    grafico_barra()
 # ---------------- Páginas ------------------
 
 def paginas():
