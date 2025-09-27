@@ -164,7 +164,6 @@ def dashboard():
         coluna_selecionada = colunas_disponiveis[coluna_chave]
 
 
-
         if not df_geral[coluna_selecionada].dropna().empty: 
 
             medida = st.selectbox(
@@ -176,12 +175,10 @@ def dashboard():
                 linhas_valores = df_geral.loc[df_geral.groupby('data')[coluna_selecionada].idxmax()] 
 
             elif medida == 'Média':
-                linhas_valores = df_geral.loc[df_geral.groupby('data')[coluna_selecionada].idxmin()]
+                linhas_valores = df_geral.groupby(['local', 'data'], as_index=False)[coluna_selecionada].mean()
 
             elif medida == 'Menor':
                 linhas_valores = df_geral.loc[df_geral.groupby('data')[coluna_selecionada].idxmin()]
-
-            st.write(linhas_valores)
 
             fig_linhas = px.line(
                 linhas_valores,
