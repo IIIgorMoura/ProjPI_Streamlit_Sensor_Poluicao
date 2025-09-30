@@ -28,9 +28,9 @@ df1['data'] = df1['data_hora'].dt.date
 df2['data'] = df2['data_hora'].dt.date
 df3['data'] = df3['data_hora'].dt.date
 
-df1['local'] = 'df1'
-df2['local'] = 'df2'
-df3['local'] = 'df3'
+df1['local'] = 'maua_interno'
+df2['local'] = 'maua_externo'
+df3['local'] = 'congonhas'
 
 data = st.sidebar.slider(
     'Faixa de Tempo',
@@ -38,6 +38,24 @@ data = st.sidebar.slider(
     max_value=df1['data'].max(),
     value=(df1['data'].min(), df1['data'].max())
 )
+
+
+colunas_disponiveis = {
+    'Temperatura': 'temperatura',
+    'Umidade': 'umidade',
+    'CO2': 'co2',
+    'Pressão': 'pressao',
+    'PM 2.5': 'poeira1',
+    'PM 10': 'poeira2'
+}
+
+coluna_chave = st.sidebar.selectbox(
+    'Filtro:',
+    options=list(colunas_disponiveis.keys()),
+    key='filtro_linha'
+)
+
+coluna_selecionada = colunas_disponiveis[coluna_chave]
 
 # ---------------- Aplicação Filtros --------
 
@@ -60,37 +78,36 @@ df3_selecionado = df3[
 
 def dashboard():
 
-    def tabela():   
-        # Dicionário mapeando nomes para DataFrames
-        tabelas = {
-            "df1": df1_selecionado,
-            "df2": df2_selecionado,
-            "df3": df3_selecionado
-        }
+# -------------------- definição graficos ----------
 
-        with st.expander('Tabela dos registros'):
-            # Seleção pelo nome
-            tabela_selecionada = st.selectbox(
+    tabelas = {
+        "Mauá interno": df1_selecionado,
+        "Mauá externo": df2_selecionado,
+        "Aeroporto Congonhas": df3_selecionado
+    }
+
+    df_geral = pd.concat([df1_selecionado, df2_selecionado, df3_selecionado])
+
+    mapa_das_cores = {
+        'maua_interno': '#2761B3',       # azul
+        'maua_externo': '#7BBEE2',       # laranja
+        'congonhas': '#7E6FB6',       # verde
+        'Maior_valor': '#CD9909', # vermelho
+        'Menor_valor': '#AC2E30', # roxo
+        'Média': '#7A461F'       # marrom
+    }
+    
+    def cards(coluna, simbolo=False):
+
+        tabela_selecionada = st.selectbox(
                 'Escolha a tabela',
                 options=list(tabelas.keys()),
                 key='filtro_tabela'
             )
 
-            # Pega o DataFrame correspondente
-            df_x = tabelas[tabela_selecionada]
+        # Pega o DataFrame correspondente
+        df_x = tabelas[tabela_selecionada]
 
-            # Seleção de colunas
-            exibicao = st.multiselect(
-                "Filtro",
-                df_x.columns,
-                default=[],
-                key="filtro_exibicao"
-            )
-
-            if exibicao:
-                st.write(df_x[exibicao])
-
-    def cards(coluna, df_x, simbolo=False):
         if not df_x[coluna].dropna().empty:
             # Encontrar os valores
             maior_coluna = df_x[coluna].max()
@@ -143,96 +160,91 @@ def dashboard():
                         value=f'{maior_coluna:,.1f}',
                         delta=f'{data_maior}'
                     )
-            st.markdown("""-----""")
 
-    def grafico_linha():
+    # Confirma se a coluna não esteja vazia
+    if not df_geral[coluna_selecionada].dropna().empty: 
 
-        df_geral = pd.concat([df1_selecionado, df2_selecionado, df3_selecionado])
+        if coluna_selecionada == 'temperatura':
+            cards('temperatura', '°C')
 
-        colunas_disponiveis = {
-            'Temperatura': 'temperatura',
-            'Umidade': 'umidade',
-            'CO2': 'co2',
-            'Pressão': 'pressao'
-        }
+        elif coluna_selecionada == 'umidade':
+            cards('umidade', '%')
 
-        coluna_chave = st.selectbox(
-            'Filtro:',
-            options=list(colunas_disponiveis.keys())
-        )
+        elif coluna_selecionada == 'co2':
+            cards('co2', 'ppm')
 
-        coluna_selecionada = colunas_disponiveis[coluna_chave]
+        elif coluna_selecionada == 'pressao':
+            cards('pressao', 'hPa')
 
+        # Separar por abas
+        tab1, tab2 = st.tabs(["📈 Linhas", "📊 Barras"])
 
-        if not df_geral[coluna_selecionada].dropna().empty: 
-
+        with tab1:
+            # Filtro da medida
             medida = st.selectbox(
-                'Filtro:',
-                ['Máximo', 'Média', 'Menor']
+                'Medida:',
+                ['Maior valor', 'Média', 'Menor valor'],
+                key='filtro_medida_linha'
             )
 
-            if medida == 'Máximo':
-                linhas_valores = df_geral.loc[df_geral.groupby('data')[coluna_selecionada].idxmax()] 
-
+            # Seleção dos dados conforme medida
+            if medida == 'Maior valor':
+                linhas_valores = df_geral.loc[
+                    df_geral.groupby('data')[coluna_selecionada].idxmax()
+                ]
             elif medida == 'Média':
-                linhas_valores = df_geral.groupby(['local', 'data'], as_index=False)[coluna_selecionada].mean()
+                linhas_valores = df_geral.groupby(
+                    ['local', 'data'], as_index=False
+                )[coluna_selecionada].mean()
+            elif medida == 'Menor valor':
+                linhas_valores = df_geral.loc[
+                    df_geral.groupby('data')[coluna_selecionada].idxmin()
+                ]
 
-            elif medida == 'Menor':
-                linhas_valores = df_geral.loc[df_geral.groupby('data')[coluna_selecionada].idxmin()]
-
+            # Gráfico de linhas
             fig_linhas = px.line(
                 linhas_valores,
                 x='data',
                 y=coluna_selecionada,
-                title='Um grafico ai?',
-                color='local'
+                title=f'{medida} de {coluna_chave} entre diferentes locais',
+                color='local',
+                color_discrete_map=mapa_das_cores,
+                labels={
+                    'data': 'Data',
+                    'local': 'Local da coleta',
+                    coluna_selecionada: coluna_chave
+                }
             )
 
             st.plotly_chart(fig_linhas, use_container_width=True)
-    
-    def grafico_barra():
 
-        tabelas = {
-            "df1": df1_selecionado,
-            "df2": df2_selecionado,
-            "df3": df3_selecionado
-        }
-
-        tabela_selecionada = st.selectbox(
-                'Escolha a tabela',
-                options=list(tabelas.keys()),
-                key='filtro_tabela'
+        with tab2:
+            # Agregações
+            valores_barra = df_geral.groupby(['local'], as_index=False).agg(
+                Maior_valor=(coluna_selecionada, 'max'),
+                Menor_valor=(coluna_selecionada, 'min'),
+                Média=(coluna_selecionada, 'mean')
+            )
+            
+            # Gráfico de barras
+            fig_barras = px.bar(
+                valores_barra,
+                x='local',
+                y=['Maior_valor', 'Menor_valor', 'Média'],
+                barmode='group',
+                title=f'Comparação da {coluna_chave} entre os locais',
+                color_discrete_map=mapa_das_cores,
+                labels={
+                    'variable': 'Medida',
+                    'value': 'Valor',
+                    'local': 'Local'
+                }
             )
 
-            # Pega o DataFrame correspondente
-        df_x = tabelas[tabela_selecionada]
+            st.plotly_chart(fig_barras, use_container_width=True)
 
-        colunas_disponiveis = {
-            'Temperatura': 'temperatura',
-            'Umidade': 'umidade',
-            'CO2': 'co2',
-            'Pressão': 'pressao'
-        }
-
-        coluna_chave = st.selectbox(
-            'Filtro:',
-            options=list(colunas_disponiveis.keys())
-        )
-
-        coluna_selecionada = colunas_disponiveis[coluna_chave]
-
-        if not df_x[coluna_selecionada].dropna().empty: 
-        
-            valores_barra = df_x.groupby(['local', 'data'], as_index=False).agg(
-                max=(coluna_selecionada, 'max'),
-                min=(coluna_selecionada, 'min'),
-                media=(coluna_selecionada, 'mean')
-            )
-
-            st.write(valores_barra)
-
-
-    grafico_barra()
+    else:
+        st.warning('Não há dados disponiveis para os filtros selecionados', icon='🥺')
 # ---------------- Páginas ------------------
 
 def paginas():
