@@ -3,7 +3,7 @@ from streamlit_option_menu import option_menu
 import plotly_express as px
 import pandas as pd
 from query import get_connection
-
+import os
 
 
 engine = get_connection()
@@ -16,12 +16,22 @@ with engine.connect() as conn:
     df2 = pd.read_sql(query, conn)
     df3 = pd.read_sql(query, conn)
 
+
 if st.sidebar.button('Atualizar Dados'):
     with engine.connect() as conn:
         df1 = pd.read_sql(query, conn)
         df2 = pd.read_sql(query, conn)
         df3 = pd.read_sql(query, conn)
 
+# ---------------- Style -------------------
+
+
+def aplicar_estilo():
+    caminho_css = os.path.join(os.path.dirname(__file__), "style.css")
+    with open(caminho_css) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+aplicar_estilo()
 
 # ---------------- Filtros ------------------
 df1['data'] = df1['data_hora'].dt.date
@@ -312,6 +322,8 @@ def dashboard():
 
 def paginas():
     with st.sidebar:
+
+        # -> Menu (deve ser o ÚLTIMO elemento renderizado na sidebar)
         selecionado = option_menu(
             menu_title="Menu",
             options=['Dashboard', 'Relatórios'],
@@ -319,11 +331,12 @@ def paginas():
             default_index=0
         )
 
+    # lógica de navegação
     if selecionado == 'Dashboard':
         dashboard()
+    else:
+        st.write("relatório")
 
-    elif selecionado == 'Relatórios':
-        st.write('relatorio')
 
 paginas()
 

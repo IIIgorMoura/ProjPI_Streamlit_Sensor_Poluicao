@@ -1,0 +1,78 @@
+
+/* Altera o fundo da sidebar */
+/* [data-testid="stSidebar"] {
+    background-color: #2d93c6;
+} */
+
+/* Texto da sidebar */
+/* [data-testid="stSidebar"] * {
+    color: #fff !important;
+} */
+
+/* Fundo das opções selecionadas (os "chips" dos multiselects) */
+/* .stMultiSelect span[data-baseweb="tag"] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+} */
+
+/* Background lojas e produtos */
+/* Fundo branco e texto preto nas caixas de filtro (lojas e produtos) */
+/* .st-bc {
+    background-color: #ffffff !important;
+} */
+
+/* Força texto preto em todos os elementos dentro da caixa */
+/* .st-bc    * {
+    color: #000000 !important;
+} */
+
+
+/* Sobrescrevendo o fundo do menu lateral */
+/* .menu .container-xxl[data-v-5af006b8] {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+} */
+
+/* Cor do fundo do site */
+/* .en45cdb4, .e14ksaui0{
+    background-color: #909;
+} */
+
+/* Aumentar o tamanho do título do header */
+/* section[data-testid="stSidebar"] h2 {
+    font-size: 1.8rem !important; 
+} */
+
+/* Aumenta o tamanho das labels "Lojas" e "Produtos" na sidebar */
+/* section[data-testid="stSidebar"] p {
+    font-size: 1.05rem ;
+} */
+
+
+.st-emotion-cache-tj3uvl {
+    padding: 0px calc(2px + 1rem) 0rem;
+    height: 100%;
+    max-height: 89vh;
+}
+
+.st-emotion-cache-17lr0tt {
+    position: static !important;
+}
+
+.st-emotion-cache-8atqhb,
+.st-emotion-cache-13o7eu2,
+.st-emotion-cache-vlxhtx  
+{
+    height: 100%;
+    position: 0;
+}
+
+.st-emotion-cache-jx6q2s edtmxes8{
+    position: relative;
+}
+
+/* caixa opção */
+.st-emotion-cache-1tvzk6f {
+    position: absolute;
+    bottom: 50px;
+}
