@@ -89,12 +89,12 @@ def dashboard():
     df_geral = pd.concat([df1_selecionado, df2_selecionado, df3_selecionado])
 
     mapa_das_cores = {
-        'maua_interno': '#2761B3',       # azul
-        'maua_externo': '#7BBEE2',       # laranja
-        'congonhas': '#7E6FB6',       # verde
-        'Maior_valor': '#CD9909', # vermelho
-        'Menor_valor': '#AC2E30', # roxo
-        'Média': '#7A461F'       # marrom
+        'maua_interno': '#2761B3',   
+        'maua_externo': '#7BBEE2',      
+        'congonhas': '#7E6FB6',       
+        'Maior_valor': '#409487', 
+        'Menor_valor': '#131766', 
+        'Média': '#4C8D26'       
     }
     
     def cards(coluna, simbolo=False):
@@ -177,7 +177,7 @@ def dashboard():
             cards('pressao', 'hPa')
 
         # Separar por abas
-        tab1, tab2 = st.tabs(["📈 Linhas", "📊 Barras"])
+        tab1, tab2, tab3 = st.tabs(["📈 Linhas", "📊 Barras", '⚠️ heatmap'])
 
         with tab1:
             # Filtro da medida
@@ -243,8 +243,71 @@ def dashboard():
 
             st.plotly_chart(fig_barras, use_container_width=True)
 
+        with tab3:
+            medida = st.selectbox(
+                'Medida:',
+                ['Maior valor', 'Média', 'Menor valor'],
+                key='filtro_medida_heatmap'
+            )
+
+            if medida == 'Maior valor':
+
+                heatmap_data = df_geral.pivot_table(
+                    index='local',
+                    columns='data',
+                    values=coluna_selecionada,
+                    aggfunc='max'  
+                )
+
+                if coluna_selecionada != 'CO2':
+                    titulo = f'no maior valor da {coluna_selecionada}'
+                else:
+                    titulo = f'no maior valor do {coluna_selecionada}'
+
+            elif medida == 'Média':
+
+                heatmap_data = df_geral.pivot_table(
+                    index='local',
+                    columns='data',
+                    values=coluna_selecionada,
+                    aggfunc='mean'  
+                )
+
+                if coluna_selecionada != 'CO2':
+                    titulo = f'na média da {coluna_selecionada}'
+                else:
+                    titulo = f'no Maior Valor do {coluna_selecionada}'
+
+            elif medida == 'Menor valor':
+
+                heatmap_data = df_geral.pivot_table(
+                    index='local',
+                    columns='data',
+                    values=coluna_selecionada,
+                    aggfunc='min'  
+                )
+
+                if coluna_selecionada != 'CO2':
+                    titulo = f'no menor valor da {coluna_selecionada}'
+                else:
+                    titulo = f'no menor valor do {coluna_selecionada}'
+
+
+
+            fig_heatmap = px.imshow(
+                heatmap_data,
+                labels=dict(x="Dias", y="Local", color=coluna_selecionada.capitalize()),
+                x=heatmap_data.columns,
+                y=heatmap_data.index,
+                title=f'Heatmap com base {titulo}',
+                color_continuous_scale="RdYlBu_r"  # escala de cores (azul=frio, vermelho=quente)
+            )
+
+            st.plotly_chart(fig_heatmap, use_container_width=True)
+
     else:
         st.warning('Não há dados disponiveis para os filtros selecionados', icon='🥺')
+
 # ---------------- Páginas ------------------
 
 def paginas():
