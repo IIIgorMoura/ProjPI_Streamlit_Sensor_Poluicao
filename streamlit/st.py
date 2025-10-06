@@ -4,27 +4,68 @@ import plotly_express as px
 import pandas as pd
 from query import get_connection
 import os
+import numpy as np
+
+# ---------------- SIMULADO -------
+
+np.random.seed(42)
+
+datas = pd.date_range("2025-10-01 08:00:00", periods=960, freq="30min")
+
+df1 = pd.DataFrame({
+    "id_registro": range(1, len(datas)+1),
+    "data_hora": datas,
+    "co2": np.random.randint(350, 500, size=len(datas)),
+    "poeira1": np.random.uniform(10, 50, size=len(datas)).round(2),
+    "poeira2": np.random.uniform(20, 60, size=len(datas)).round(2),
+    "altitude": np.random.randint(100, 200, size=len(datas)),
+    "umidade": np.random.uniform(40, 90, size=len(datas)).round(1),
+    "temperatura": np.random.uniform(15, 35, size=len(datas)).round(1),
+    "pressao": np.random.uniform(950, 1050, size=len(datas)).round(1)
+})
+
+df2 = pd.DataFrame({
+    "id_registro": range(1, len(datas)+1),
+    "data_hora": datas,
+    "co2": np.random.randint(350, 500, size=len(datas)),
+    "poeira1": np.random.uniform(10, 50, size=len(datas)).round(2),
+    "poeira2": np.random.uniform(20, 60, size=len(datas)).round(2),
+    "altitude": np.random.randint(100, 200, size=len(datas)),
+    "umidade": np.random.uniform(40, 90, size=len(datas)).round(1),
+    "temperatura": np.random.uniform(15, 35, size=len(datas)).round(1),
+    "pressao": np.random.uniform(950, 1050, size=len(datas)).round(1)
+})
+
+df3 = pd.DataFrame({
+    "id_registro": range(1, len(datas)+1),
+    "data_hora": datas,
+    "co2": np.random.randint(350, 500, size=len(datas)),
+    "poeira1": np.random.uniform(10, 50, size=len(datas)).round(2),
+    "poeira2": np.random.uniform(20, 60, size=len(datas)).round(2),
+    "altitude": np.random.randint(100, 200, size=len(datas)),
+    "umidade": np.random.uniform(40, 90, size=len(datas)).round(1),
+    "temperatura": np.random.uniform(15, 35, size=len(datas)).round(1),
+    "pressao": np.random.uniform(950, 1050, size=len(datas)).round(1)
+})
+# ---------------- OFICIAL ---------
+
+# engine = get_connection()
+
+# query = "SELECT * FROM tb_sensor"
+
+# with engine.connect() as conn:
+#     df1 = pd.read_sql(query, conn)
+#     df2 = pd.read_sql(query, conn)
+#     df3 = pd.read_sql(query, conn)
 
 
-engine = get_connection()
-
-query = "SELECT * FROM tb_sensor"
-
-
-with engine.connect() as conn:
-    df1 = pd.read_sql(query, conn)
-    df2 = pd.read_sql(query, conn)
-    df3 = pd.read_sql(query, conn)
-
-
-if st.sidebar.button('Atualizar Dados'):
-    with engine.connect() as conn:
-        df1 = pd.read_sql(query, conn)
-        df2 = pd.read_sql(query, conn)
-        df3 = pd.read_sql(query, conn)
+# if st.sidebar.button('Atualizar Dados'):
+#     with engine.connect() as conn:
+#         df1 = pd.read_sql(query, conn)
+#         df2 = pd.read_sql(query, conn)
+#         df3 = pd.read_sql(query, conn)
 
 # ---------------- Style -------------------
-
 
 def aplicar_estilo():
     caminho_css = os.path.join(os.path.dirname(__file__), "style.css")
@@ -34,13 +75,21 @@ def aplicar_estilo():
 aplicar_estilo()
 
 # ---------------- Filtros ------------------
+
 df1['data'] = df1['data_hora'].dt.date
 df2['data'] = df2['data_hora'].dt.date
 df3['data'] = df3['data_hora'].dt.date
 
+df1["hora"] = df1["data_hora"].dt.hour
+df2["hora"] = df2["data_hora"].dt.hour
+df3["hora"] = df3["data_hora"].dt.hour
+
+
 df1['local'] = 'maua_interno'
 df2['local'] = 'maua_externo'
 df3['local'] = 'congonhas'
+
+
 
 data = st.sidebar.slider(
     'Faixa de Tempo',
@@ -264,7 +313,7 @@ def dashboard():
 
                 heatmap_data = df_geral.pivot_table(
                     index='local',
-                    columns='data',
+                    columns='hora',
                     values=coluna_selecionada,
                     aggfunc='max'  
                 )
@@ -278,7 +327,7 @@ def dashboard():
 
                 heatmap_data = df_geral.pivot_table(
                     index='local',
-                    columns='data',
+                    columns='hora',
                     values=coluna_selecionada,
                     aggfunc='mean'  
                 )
@@ -292,7 +341,7 @@ def dashboard():
 
                 heatmap_data = df_geral.pivot_table(
                     index='local',
-                    columns='data',
+                    columns='hora',
                     values=coluna_selecionada,
                     aggfunc='min'  
                 )
@@ -306,7 +355,7 @@ def dashboard():
 
             fig_heatmap = px.imshow(
                 heatmap_data,
-                labels=dict(x="Dias", y="Local", color=coluna_selecionada.capitalize()),
+                labels=dict(x="Horas do dia", y="Local", color=coluna_selecionada.capitalize()),
                 x=heatmap_data.columns,
                 y=heatmap_data.index,
                 title=f'Heatmap com base {titulo}',
